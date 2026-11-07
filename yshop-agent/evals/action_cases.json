@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "scope": "confirmed_cart_action_restart_workflow",
+  "frozen_before_live_requests": true,
+  "live_acceptance_status": "pending",
+  "scenario": {
+    "id": "cancel_restart_confirm_duplicate",
+    "query": "预算3元，查询华为商品，请使用商品查询工具核实实时数据。",
+    "prepare": "选择第一个商品的A4,白色规格，加入一件购物车。",
+    "target": {
+      "product_id": 36,
+      "unique_id": "c38b4340485b465d92b787dd68dcc26e",
+      "sku_name": "A4,白色",
+      "quantity": 1,
+      "unit_price": "1.00"
+    },
+    "preflight_declaration": {
+      "source": "logs/agent-day6/read-only-preflight-20261028-01.json",
+      "stock": 8882,
+      "unit_price": "1.00",
+      "scope": "Earlier read-only observation, not current live-card or confirmation evidence."
+    },
+    "steps": [
+      "query",
+      "cart_before_cancel",
+      "prepare_cancel",
+      "cancel",
+      "cart_after_cancel",
+      "prepare_saved",
+      "stop_agent",
+      "start_agent_same_database",
+      "recover_saved_action",
+      "cart_before_confirm",
+      "confirm_once",
+      "cart_after_confirm",
+      "confirm_duplicate",
+      "cart_after_duplicate"
+    ],
+    "expected": {
+      "cancellation_cart_writes": 0,
+      "confirmation_cart_writes": 1,
+      "duplicate_cart_writes": 0,
+      "same_sku_quantity_growth": 1
+    }
+  },
+  "deterministic_cases": [
+    {
+      "id": "exclusive_decision_report",
+      "verification": "injected_transport",
+      "test_selector": "tests/test_action_cli.py::test_cli_rejects_existing_report_before_confirmation"
+    },
+    {
+      "id": "uncertain_decision_no_retry",
+      "verification": "injected_transport",
+      "test_selector": "tests/test_action_cli.py::test_decision_transport_failure_stops_after_one_request_with_unknown_outcome"
+    },
+    {
+      "id": "replacement_needs_explicit_approval",
+      "verification": "injected_transport",
+      "test_selector": "tests/test_action_cli.py::test_replacement_card_needs_a_new_explicit_decision_without_auto_confirm"
+    },
+    {
+      "id": "owned_process_restart",
+      "verification": "injected_process_boundary",
+      "test_selector": "tests/test_action_cli.py::test_owned_process_commands_reuse_database_apply_environment_and_stop_only_owned"
+    },
+    {
+      "id": "metadata_only_observer",
+      "verification": "injected_transport",
+      "test_selector": "tests/test_action_cli.py::test_observer_records_only_metadata_and_never_changes_real_response"
+    }
+  ]
+}

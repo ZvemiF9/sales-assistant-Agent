@@ -1,0 +1,15 @@
+flowchart LR
+    H[原 uni-app H5 聊天与确认卡] -->|当前商城 Bearer 身份| A[FastAPI 路由与 owner 校验]
+    A --> Q[查询图 model / tools / finish]
+    Q -->|公开上下文与只读工具定义| M[模型服务]
+    Q --> T[QueryTools 参数校验与公开投影]
+    T -->|实时只读请求| J[YShop Java API]
+    T --> R[本地规则检索与原文证据]
+    R --> V[Chroma 与本地 BGE 向量模型]
+    R --> K[演示规则 Markdown]
+    A --> C[确认动作图 prepare / wait / execute / cancel]
+    C -->|确认后一次加购 POST 与回读| J
+    A -->|完成轮次| S[(会话 / 动作 / 事件 SQLite)]
+    C -->|动作事实与执行权| S
+    C --> P[(独立官方 SQLite checkpoint)]
+    J --> D[(原商城 MySQL / Redis)]

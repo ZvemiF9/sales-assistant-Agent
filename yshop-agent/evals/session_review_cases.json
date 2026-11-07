@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "scope": "day5_review_regressions_real_cli",
+  "frozen_before_acceptance": true,
+  "messages": [
+    "预算3元，查询柏黛雅商品，请使用商品查询工具核实实时数据。",
+    "预算改成两元，换成华为",
+    "这个能退吗",
+    "预算3元，改成柏黛雅"
+  ],
+  "expected": [
+    {"status": "answered", "tool": "search_products", "product_id": 34, "max_price": "3"},
+    {"status": "answered", "tool": "search_products", "product_id": 36, "max_price": "2"},
+    {"status": "answered", "tool": "search_policy", "no_products": true, "policy_sources": true},
+    {"status": "answered", "tool": "search_products", "product_id": 34, "max_price": "3"}
+  ],
+  "provenance": "Real-model mode is the CLI runner declaration; independently observed HTTP evidence remains in the separate frozen session acceptance."
+}

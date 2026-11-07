@@ -1,0 +1,12 @@
+flowchart TD
+    P[实时预检与保存不可变卡 pending] --> G[prepare 读取已保存卡]
+    G --> W[wait：interrupt 持久化等待]
+    W -->|当前 owner 的 confirm| E[execute：再预检]
+    W -->|当前 owner 的 cancel| C[cancel：保存 cancelled]
+    E -->|价格或规格名变化| R[旧卡 cancelled；新 action_id 与新卡]
+    R --> G
+    E -->|资格或库存失败| F[failed]
+    E -->|卡一致且 CAS 成功| X[executing：一次 cart/add POST]
+    X -->|响应与回读一致| S[succeeded]
+    X -->|明确业务拒绝| F
+    X -->|超时、回读不一致或执行中断| U[unknown：只读核对，不重放]

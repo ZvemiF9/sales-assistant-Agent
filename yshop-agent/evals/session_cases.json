@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "scope": "completed_turn_read_only_sessions",
+  "frozen_before_acceptance": true,
+  "cases": [
+    {
+      "id": "budget_policy_reference",
+      "verification": "real_model_acceptance",
+      "turns": [
+        {"message": "预算3元，查询华为商品，请使用商品查询工具核实实时数据。", "status": "answered", "tool": "search_products", "max_price": "3", "keyword": "华为"},
+        {"message": "预算改成2元", "status": "answered", "tool": "search_products", "max_price": "2", "keyword": "华为"},
+        {"message": "查看第一个商品的库存和规格", "status": "answered", "tool": "get_product_detail", "reference_index": 0},
+        {"message": "不合适能退货吗？请查询演示规则。", "status": "answered", "tool": "search_policy", "document_id": "06-return-eligibility", "preserve_selection": true},
+        {"message": "这个商品现在有多少库存？", "status": "answered", "tool": "get_product_detail", "reference_index": 0},
+        {"message": "取消预算限制", "status": "answered", "tool": "search_products", "clear_budget": true, "keyword": "华为"},
+        {"message": "换成柏黛雅", "status": "answered", "tool": "search_products", "clear_budget": true, "keyword": "柏黛雅"}
+      ]
+    },
+    {
+      "id": "latest_display_order",
+      "verification": "real_model_acceptance",
+      "turns": [
+        {"message": "查询商城普通商品，关键词留空，最多展示三个，请使用商品查询工具。", "status": "answered", "tool": "search_products", "min_products": 2},
+        {"message": "查看第二个商品的实时详情", "status": "answered", "tool": "get_product_detail", "reference_index": 1},
+        {"message": "查看第二个的库存", "status": "needs_input", "tool_count": 0}
+      ]
+    },
+    {
+      "id": "new_session_missing_reference",
+      "verification": "real_model_acceptance",
+      "turns": [{"message": "查看第二个商品的库存", "status": "needs_input", "tool_count": 0}]
+    },
+    {
+      "id": "restart_restore",
+      "verification": "real_model_acceptance",
+      "after_process_restart": true,
+      "message": "这个商品现在有多少库存？",
+      "status": "answered",
+      "tool": "get_product_detail",
+      "expected_product": "selected product saved by latest_display_order"
+    },
+    {
+      "id": "ownership_concurrency_failure",
+      "verification": "deterministic_tests",
+      "tests": ["test_sessions.py", "test_session_chat_api.py"],
+      "requirements": ["foreign and unknown IDs return the same 404", "active lease returns 409", "stale lease cannot commit", "failed model/tool round preserves completed state", "current identity checked every request", "credentials and nickname absent from persisted/public context"]
+    },
+    {
+      "id": "budget_bounds_history_and_limits",
+      "verification": "deterministic_tests",
+      "tests": ["test_conversation.py", "test_agent_graph.py"],
+      "requirements": ["budget range and clearing", "explicit bounds override stale model values", "latest displayed candidate order", "SKU ambiguity asks for input", "policy sources reset every turn", "model counters reset every message", "snapshot at most 64 KiB and history at most 12 messages"]
+    }
+  ]
+}
